@@ -23,7 +23,7 @@ folium.Marker(
     [35.99088771045777, -84.18989279737596],
     icon=folium.Icon(prefix="fa", icon="church", color="green"),
 ).add_to(m)
-for addr, grp in df.groupby("ADR"):
+for addr, grp in df.groupby(["lat", "lon"]):
     row = grp.iloc[0]
     folium.Marker(
         [row["lat"], row["lon"]], popup=" / ".join(grp["Family"].unique())
