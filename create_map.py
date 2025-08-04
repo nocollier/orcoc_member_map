@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import folium
 
 from directory import get_directory
@@ -29,3 +31,12 @@ for addr, grp in df.groupby(["lat", "lon"]):
         [row["lat"], row["lon"]], popup=" / ".join(grp["Family"].unique())
     ).add_to(m)
 m.save("map.html")
+
+with open("map.html") as fin:
+    html = fin.read()
+    html = html.replace(
+        "<head>",
+        f"<head><title>Member Map v{datetime.now().strftime('%Y.%m.%d')}</title>",
+    )
+with open("map.html", "w") as fout:
+    fout.write(html)
