@@ -1,0 +1,1 @@
+Creates a Oak Ridge church of Christ member map from the `Directory.vcf` data you can download from the *Members* section of the website. Location latitude/longitude must be manually obtained. Having it automated just wasn't worth figuring out which service would get it right for free.
