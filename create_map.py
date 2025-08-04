@@ -1,59 +1,31 @@
 import folium
-import pandas as pd
 
-from locations import locations
+from directory import get_directory
 
+df = get_directory()
 
-def parse_vcf_to_dataframe(vcf_file_path):
-    contacts = []
-    current_contact = {}
+# Only include those with a location
+df = df.dropna(subset="lat")
 
-    with open(vcf_file_path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line == "BEGIN:VCARD":
-                current_contact = {}  # Start a new contact
-            elif line == "END:VCARD":
-                contacts.append(current_contact)  # Add completed contact to list
-            elif ":" in line:
-                # Basic parsing for key:value pairs
-                key, value = line.split(":", 1)
-                # Handle potential parameters (e.g., TEL;TYPE=HOME)
-                if ";" in key:
-                    key = key.split(";")[0]
-                current_contact[key] = value.replace(";", " ").strip()
-
-    df = pd.DataFrame(contacts)
-    return df
-
-
-df = parse_vcf_to_dataframe("Directory.vcf")
-df["Family"] = df["N"].apply(
-    lambda n: " ".join(n.split()[:2]) if "Buskirk" in n else n.split()[0]
-)
-df = df[
-    (df["Family"] != "Pickrell")
-    & (df["Family"] != "Andersons")
-    & (df["Family"] != "Bruney")
-]
-df["latlon"] = df["ADR"].apply(lambda a: locations[a] if a in locations else pd.NA)
-
-noaddr = df[df["latlon"].isna()]
-if len(noaddr):
-    print("No addresses for:")
-    print(noaddr)
-
-df = df.dropna(subset="latlon")
+# Make the map using folium
+lat0 = df["lat"].mean()
+lon0 = df["lon"].mean()
 m = folium.Map(
-    location=[
-        df["latlon"].apply(lambda v: v[0]).mean(),
-        df["latlon"].apply(lambda v: v[1]).mean(),
-    ],
+    location=[lat0, lon0],
     zoom_start=10,
 )
+folium.Marker(
+    [lat0, lon0],
+    popup="Person-weighted Center",
+    icon=folium.Icon(prefix="fa", icon="arrows-to-circle", color="red"),
+).add_to(m)
+folium.Marker(
+    [35.99088771045777, -84.18989279737596],
+    icon=folium.Icon(prefix="fa", icon="church", color="green"),
+).add_to(m)
 for addr, grp in df.groupby("ADR"):
     row = grp.iloc[0]
-    folium.Marker(row["latlon"], popup=" / ".join(grp["Family"].unique())).add_to(m)
-
-# Save the map to an HTML file
+    folium.Marker(
+        [row["lat"], row["lon"]], popup=" / ".join(grp["Family"].unique())
+    ).add_to(m)
 m.save("map.html")
