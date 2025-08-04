@@ -18,7 +18,7 @@ m = folium.Map(
 )
 folium.Marker(
     [lat0, lon0],
-    popup="Person-weighted Center",
+    popup="Person-weighted Center as the Crow Flies",
     icon=folium.Icon(prefix="fa", icon="arrows-to-circle", color="red"),
 ).add_to(m)
 folium.Marker(
