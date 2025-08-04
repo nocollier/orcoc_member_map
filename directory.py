@@ -41,7 +41,7 @@ def manual_fixes(df: pd.DataFrame) -> pd.DataFrame:
     noaddr = df[df["lat"].isna()]
     if len(noaddr):
         print("No addresses for:")
-        print(noaddr)
+        print(noaddr[["N", "ADR"]].to_string())
     return df
 
 
